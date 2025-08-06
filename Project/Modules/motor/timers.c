@@ -1,15 +1,8 @@
-/*
- ******************************************************************************
- * @file           : timers.c
- * @author         : D. Mucha
- * @brief          : Timers configuration
- ******************************************************************************
- */
-
 #include <stdint.h>
 #include "timers.h"
 #include "motor.h"
 #include "can/can.h"
+#include "leds/leds.h"
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim5;
@@ -27,20 +20,26 @@ static void TIM_speedPeriodElapsedCallback(TIM_HandleTypeDef *htim);
 
 void TIM_init(void) {
 	HAL_TIM_RegisterCallback(tim_speed, HAL_TIM_PERIOD_ELAPSED_CB_ID, TIM_speedPeriodElapsedCallback);
+	HAL_TIM_Base_Start_IT(tim_speed);
+    HAL_TIM_PWM_Start(tim_pwm, PWM_CHANNEL);
+    HAL_TIM_Encoder_Start(tim_encoder, TIM_CHANNEL_ALL);
 }
 
-void TIM_speedPeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+void TIM_speedPeriodElapsedCallback(TIM_HandleTypeDef* htim) {
 	(void) htim;
 
-	g_encoderTick = (int32_t) htim1.Instance->CNT;
+	g_encoderTick = (int32_t) tim_encoder->Instance->CNT;
 
 	// resetting counter for next interrupt
-	__HAL_TIM_SET_COUNTER(&htim1, 0);
+	__HAL_TIM_SET_COUNTER(tim_encoder, 0);
 
 	updatePID(g_encoderTick);
 
-	// every 10 callbacks
+	// every 10 callbacks (1s)
 	if ((timer_counter % 10) == 0) {
+		LED_TOGGLE(LED_1);
+		message_recived = 1; // hack for testing TODO implement fully
+
 		uint32_t speed = *(uint32_t *) &current_speed;
 		Command command = {0};
 
@@ -52,15 +51,15 @@ void TIM_speedPeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 		CAN_transmit(&command);
 	}
-
-	// every 30 callbacks
+	
+	// every 30 callbacks (3s)
 	if ((timer_counter % 30) == 0) {
+
 		if (!message_recived) {
 			target_speed = 0;
 			// coms loss
 			// panic!!!
 		}
-		message_recived = 1;
 	}
 
 	timer_counter++;
