@@ -4,7 +4,7 @@
 #include "stm32f4xx_hal.h"
 
 #define PWM_CHANNEL TIM_CHANNEL_1
-#define ENC_MAX_PULSE_VALUE 20000
+#define ENC_MAX_PULSE_VALUE 65535
 #define ENC_PULSE_PER_ROTATION 1024
 #define VELOCITY_CLOCK_TIME 100 //in ms
 

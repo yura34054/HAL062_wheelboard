@@ -5,3 +5,4 @@
 * telemetry
 * update function dersriptions in header file
 * document code
+* limit speed to 1m/s

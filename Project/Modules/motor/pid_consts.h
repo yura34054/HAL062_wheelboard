@@ -9,9 +9,6 @@
 #ifndef MODULES_MOTORS_PID_CONSTS_H
 #define MODULES_MOTORS_PID_CONSTS_H
 
-// alpha parameter of LPF filter (alpha = dt / (RC + dt))
-// const float LPF_ALPHA = 1;
-
 #define TP (float) 0.1 // 100 ms = 8 Mhz clock / (80 kHz tim7 prescaler * 10 tim7 period) -> encoders measure
 
 #define PID_K (float) 3.5
